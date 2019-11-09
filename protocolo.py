@@ -25,35 +25,31 @@ def codifica(apelido, mensagem):
 
         return bMensagem
 
-    # Comando de login
-    if apelido == '':
-        return MontaMensagem('apelido!', mensagem)
-
-    # Comando de login
-    if apelido == 'Servidor' and mensagem == 'encerrar':
-        return MontaMensagem('encerrar')
-
-    # Comando de login
-    pos = mensagem.find('apelido?')
-    if pos != -1 and apelido == 'Servidor':
-        return MontaMensagem('apelido?')
-
     # Comando de usuário tentando entrar
     pos = mensagem.find('entrando')
     if pos != -1 and apelido == 'Servidor':
         return MontaMensagem('entrando', mensagem[8:])
 
-    # Comando de usuário tentando entrar
-    pos = mensagem.find('apelido0')
+    # Comando que o servidor manda para pedir apelido
+    pos = mensagem.find('apelido?')
     if pos != -1 and apelido == 'Servidor':
-        return MontaMensagem('apelido0')
+        return MontaMensagem('apelido?')
 
-    # Comando de usuário tentando entrar
+    # Comando que envia uma sugestão de apelido
+    if apelido == '':
+        return MontaMensagem('apelido!', mensagem)
+
+    # Comando que o servidor manda para informar que o apelido está indisponível
     pos = mensagem.find('jaExiste')
     if pos != -1 and apelido == 'Servidor':
         return MontaMensagem('jaExiste')
 
-    # Comando de usuário tentando entrar
+    # Comando que o servidor manda para rejeitar o apelido (retorna mensagem '' pro usuário)
+    pos = mensagem.find('apelido0')
+    if pos != -1 and apelido == 'Servidor':
+        return MontaMensagem('apelido0')
+
+    # Comando que o servidor manda depois que o apelido foi aceito, este retorna o apelido disponível
     pos = mensagem.find('apelido1')
     if pos != -1 and apelido == 'Servidor':
         return MontaMensagem('apelido1', mensagem[8:])
@@ -68,15 +64,20 @@ def codifica(apelido, mensagem):
     if pos != -1:
         return MontaMensagem('    sair')
 
-    # Comando lista
+    # Comando que o servidor manada para desligar os clientes
+    if apelido == 'Servidor' and mensagem == 'encerrar':
+        return MontaMensagem('encerrar')
+
+    # Comando requisição de lista
     pos = mensagem.find("lista()")
     if pos != -1:
         return MontaMensagem('  lista?')
 
+    # Comando resposta de lista
     if apelido == 'Lista':
         return MontaMensagem('  lista!', mensagem)
 
-    # Comando lista
+    # Comando de tentativa de envio de mensagem privada
     pos = mensagem.find("privado(")
     if pos != -1:
         fim = mensagem.find(')')
@@ -84,16 +85,17 @@ def codifica(apelido, mensagem):
         mensagem = mensagem[0:pos] + mensagem[fim+1:]
         return MontaMensagem('privado?', destinatario + mensagem)
 
-    # Comando lista
+    # Comando de sucesso de envio de mensagem privada
     pos = mensagem.find("privadoOK")
     if pos != -1:
         mensagem = mensagem[9:]
         return MontaMensagem('privado1', mensagem)
 
-    # Comando lista
+    # Comando de falha de envio de mensagem privada
     pos = mensagem.find("privadoFAIL")
     if pos != -1:
         mensagem = mensagem[9:]
         return MontaMensagem('privado0')
 
+    # Mensagem para a sala texto sem conter nenhum comando
     return MontaMensagem('   todos', mensagem)

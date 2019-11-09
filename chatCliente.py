@@ -36,29 +36,28 @@ serverPort = 65000  # porta a se conectar
 clientSocket = socket(AF_INET, SOCK_STREAM)  # criacao do socket TCP
 clientSocket.connect((serverName, serverPort))  # conecta o socket ao servidor
 
-
 # Cria e inicia a thread do display
 display = Display()
 display.start()
 
 # login...
 apelido = ''
-while apelido == '':
+while apelido == '':  # Enquanto o apelido fornecido não estiver disponível...
     # Recebe mensagem de aviso
     display.listaDeMensagens.append(
         clientSocket.recv(1024))
-    # Manda o apelido
+    # Manda o apelido. Quando o apelido é '', o codificador retorna uma mensagem com o comando 'apelido!'
     clientSocket.send(codifica('', display.entrada.getEntrada()))
     # Atribui a apelido recebido do servidor em caso de sucesso ou '' em caso de falha
     apelido = display.trataMensagem(clientSocket.recv(1024)).get('mensagem')
-    # Tira a última mensagem enviada pelo servidor da lista de mensagens
+    # Tira a última mensagem enviada pelo servidor da lista de mensagens do display
     display.listaDeMensagens.pop(0)
 
 # Cria e inicia a thread responsável por receber as mensagens do servidor independetemente
 servidor = Servidor(clientSocket, display)
 servidor.start()
 
-# Enquando o usuário não pedir pra sair...
+# Enquando o usuário não pedir pra sair, fica mandando quantas mensagens o usuário quiser...
 mensagem = ''
 while mensagem.find('sair()') == -1:
     mensagem = display.entrada.getEntrada()
