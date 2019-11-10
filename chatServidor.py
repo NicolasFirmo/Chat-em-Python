@@ -21,6 +21,7 @@ class Usuario(Thread):
     def mataThread(self):
         self.vivo = False
         self.sSocket.close()
+        listaDeUsuarios.remove(self)
         sleep(0.1)
 
     def run(self):
@@ -39,13 +40,15 @@ class Usuario(Thread):
                 sendBroadcast(bMensagem)
                 self.listaDeMensagens.append(bMensagem)
                 self.mataThread()
-                listaDeUsuarios.remove(self)
             elif comando == 'privado?':
                 sendPrivado(self, bMensagem)
             elif comando == '  lista?':
-                sendLista(self)
+                self.sSocket.send(fazLista())
             else:
-                self.sSocket.send(bMensagem)
+                try:
+                    self.sSocket.send(bMensagem)
+                except BrokenPipeError:
+                    self.mataThread()
 
 
 # definicao das variaveis e funções
@@ -68,7 +71,10 @@ display.start()
 # Manda a mensagem recebida para todos os usuários logados e para o display do servidor
 def sendBroadcast(bMensagem):
     for usuario in listaDeUsuarios:
-        usuario.sSocket.send(bMensagem)
+        try:
+            usuario.sSocket.send(bMensagem)
+        except OSError:
+            usuario.mataThread()
 
 
 # Manda a mensagem recebida para todos os usuários logados e para o display do servidor
@@ -92,14 +98,14 @@ def sendPrivado(origem, bMensagem):
         origem.sSocket.send(bMensagemFAIL)
 
 
-# Manda a lista pra quem pediu
-def sendLista(origem):
+# Faz a lista formatada
+def fazLista():
     lista = ''
     for usuario in listaDeUsuarios:
         lista += usuario.apelido + '\t' + \
             str(usuario.addr[0]) + '\t' + str(usuario.addr[1]) + '\n'
     bMensagem = codifica('Lista', lista)
-    origem.sSocket.send(bMensagem)
+    return bMensagem
 
 
 despachadorVivo = True
@@ -141,6 +147,9 @@ def ConectaUsuario(connectionSocket, addr):
                         apelido = apelido[:apelido.find(' ')]
                     break
 
+        if apelido == '':  # Abora caso o usuário não complete o login devidamente
+            return
+
         bMensagem = codifica('Servidor', 'apelido1'+apelido)
         connectionSocket.send(bMensagem)
 
@@ -172,6 +181,9 @@ mensagem = ''
 # Enquando o usuário não pedir pra sair...
 while mensagem.find('sair()') == -1:
     mensagem = display.entrada.getEntrada()
+    if mensagem.find('lista()') != -1:
+        display.listaDeMensagens.append(fazLista())
+        continue
     display.listaDeMensagens.append(codifica('Serivdor', mensagem))
 
 display.mataThread()

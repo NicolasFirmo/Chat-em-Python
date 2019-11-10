@@ -176,8 +176,11 @@ class Display(Thread):
             for usuario in lista:
                 usuarioSplit = usuario.split('\t')
                 cor = self.getCor(usuarioSplit[0])
-                listaColorida += '│' + cor + '{0:<18}\033[38;5;255m│{1:<18}│{2:<18}│\n'.format(
-                    usuarioSplit[0], usuarioSplit[1], usuarioSplit[2])
+                try:
+                    listaColorida += '│' + cor + '{0:<18}\033[38;5;255m│{1:<18}│{2:<18}│\n'.format(
+                        usuarioSplit[0], usuarioSplit[1], usuarioSplit[2])
+                except IndexError:
+                    return {'mensagem': '\033[38;5;248mA sala está vazia!\033[38;5;255m', 'comando': comando}
 
             return {'mensagem': topo + '\n│{0:<18}│{1:<18}│{2:<18}│\n'.format('APELIDO', 'IP', 'PORTA') + cabeca + '\n' + listaColorida + chao + '\033[22;38;5;255m', 'comando': comando}
 

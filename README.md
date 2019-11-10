@@ -6,7 +6,7 @@ Execute o cliente e o servidor pelos [clienteEXE](./clienteEXE) e [servidorEXE](
 ```console
 $ ./<cliente/servidor>EXE
 ```
-ou ative o ambinete virual por conta própria e execute os códigos em python [chatCliente.py](./chatCliente.py) e [chatServidor.py](./chatServidor.py)
+Ou ative o ambinete virual por conta própria e execute os códigos em python [chatCliente.py](./chatCliente.py) e [chatServidor.py](./chatServidor.py)
 ```console
 $ source /chat/bin/activate
 $ python3 chat<Cliente/Servidor>.py
