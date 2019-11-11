@@ -1,5 +1,6 @@
 from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
+from time import sleep
 
 # Minha classe responsável pela interface e pelo tratamento das mensagens
 from display import Display
@@ -20,14 +21,16 @@ class Servidor(Thread):
     def mataThread(self):
         self.vivo = False
         self.cSocket.close
+        self.display.mataThread()
 
     def run(self):
         while self.vivo:
             bMensagem = self.cSocket.recv(1024)
             # comando que o servidor envia para forçar a desconexão
-            if display.trataMensagem(bMensagem).get('comando') == 'encerrar':
-                self.mataThread()
             self.listaDeMensagens.append(bMensagem)
+            if display.trataMensagem(bMensagem).get('comando') == 'encerrar':
+                sleep(0.1)
+                self.mataThread()
 
 
 # definicao das variaveis
@@ -64,6 +67,5 @@ while mensagem.find('sair()') == -1:
     clientSocket.send(codifica(apelido, mensagem))
 
 # Encerra as threads e a conexão com o servidor
-display.mataThread()
 servidor.mataThread()
 print('\033[0m')  # printa uma nova linha

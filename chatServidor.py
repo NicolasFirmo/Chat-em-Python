@@ -200,9 +200,9 @@ while mensagem.find('sair()') == -1:
 
 # Encerra as threads e aa conexões com todos os clientes logados
 display.mataThread()
-for usuario in listaDeUsuarios:
-    usuario.sSocket.send(codifica('Servidor', 'encerrar'))
-    usuario.mataThread()
+while listaDeUsuarios != []:
+    listaDeUsuarios[0].sSocket.send(codifica('Servidor', 'encerrar'))
+    listaDeUsuarios[0].mataThread()
 despachadorVivo = False
 socketFechadora = socket(AF_INET, SOCK_STREAM).connect(
     (serverName, serverPort))
