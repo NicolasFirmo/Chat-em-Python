@@ -8,6 +8,7 @@ from display import Display
 from protocolo import codifica
 
 
+# Classe que faz a interface com o servidor
 class Servidor(Thread):
     def __init__(self, clientSocket, display):
         super().__init__()
@@ -19,18 +20,17 @@ class Servidor(Thread):
     def mataThread(self):
         self.vivo = False
         self.cSocket.close
-        self.display.mataThread()
-        print('\033[0m')
 
     def run(self):
         while self.vivo:
             bMensagem = self.cSocket.recv(1024)
+            # comando que o servidor envia para forçar a desconexão
             if display.trataMensagem(bMensagem).get('comando') == 'encerrar':
                 self.mataThread()
             self.listaDeMensagens.append(bMensagem)
 
 
-# definicao das variaveis e funções
+# definicao das variaveis
 serverName = 'localhost'  # ip do servidor
 serverPort = 65000  # porta a se conectar
 clientSocket = socket(AF_INET, SOCK_STREAM)  # criacao do socket TCP
@@ -66,3 +66,4 @@ while mensagem.find('sair()') == -1:
 # Encerra as threads e a conexão com o servidor
 display.mataThread()
 servidor.mataThread()
+print('\033[0m')  # printa uma nova linha

@@ -1,4 +1,5 @@
 from threading import Thread, Event
+from time import sleep
 
 # Obtem a largura da janela para imprimir o número certo de linhas
 # que dividem o campo de digitação do resto da tela
@@ -7,17 +8,14 @@ from os import get_terminal_size
 # Ajuda na colorização dos nomes
 from colorsys import hsv_to_rgb
 
-# Sorteia a cor dos nomes
+# Para sortear a cor dos nomes
 from random import uniform
 
-# Para fazer o diplay ficar sincronizado
-from time import sleep
-
-from ansiwrap import ansilen
-
+# Para pegar a tecla no momento que ela foi pressionada
 from getkey import getkey, keys
 
 
+# Classe responsável por gerenciar o que for digitado via teclado (encapsulado pelo display)
 class Entrada(Thread):
     def __init__(self):
         super().__init__()  # executa o __init__ da classe pai: Thread [padrão]
@@ -60,25 +58,32 @@ class Entrada(Thread):
                 self.buffer += self.key  # Adiciona a letra ao buffer
 
 
+# Classe responsável por gerenciar o que será exposto na tela do terminal
 class Display(Thread):
     def __init__(self):
         super().__init__()
         self.vivo = True
-        self.limpa = "\n"*100  # String que limpra a tela
-        self._linhaTam()  # Executa a função logo na inicialização
+        # String que limpra a tela
+        self.limpa = "\n"*100
+        # determina o tamanho da linha que divida a seção da entrada e do chat a cada frame
+        self._linhaTam()
+        # escape code que define a primeira cor de fundo do display
         self.bg1 = "\033[48;2;71;76;79m"
+        # escape code que define a segunda cor de fundo do display
         self.bg2 = "\033[48;2;51;54;57m"
-        self.lCores = []  # Lista de cores para cada usuário
-        self.listaDeMensagens = []  # Buffer para as mensagens que irão aparecer na tela
-        self.entrada = Entrada()  # Objeto de input
-        self.entrada.start()  # Inicia a thread
+        # Lista de cores para cada usuário
+        self.lCores = []
+        # Buffer para as mensagens que irão aparecer na tela
+        self.listaDeMensagens = []
+        self.entrada = Entrada()
+        self.entrada.start()
+        # define a cor inicial das letras para branco
         print("\033[38;5;255m")
 
     def mataThread(self):
         self.entrada.mataThread()
         self.vivo = False
 
-    # Prepara a string da linha que divide o campo de digitação do resto da tela
     def _linhaTam(self):
         self.linha = "─"*get_terminal_size(0)[0]
 
@@ -122,9 +127,6 @@ class Display(Thread):
         cor = self.getCor(apelido)
 
         comando = bMensagem[18:26].decode('utf-8')
-
-        if apelido == 'Servidor' and comando == 'encerrar':
-            return {'mensagem': '', 'comando': comando}
 
         if comando == 'entrando':
             addr = bMensagem[26:tam].decode('utf-8')
@@ -187,39 +189,12 @@ class Display(Thread):
         elif comando == '    sair':
             return {'mensagem': "\033[38;5;248m" + apelido + " saiu!\033[38;5;255m", 'comando': comando}
 
+        elif apelido == 'Servidor' and comando == 'encerrar':
+            return {'mensagem': '', 'comando': comando}
+
         elif comando == '   todos':  # Mandar menságem pública (para o grupo)
             mensagem = bMensagem[26:tam].decode('utf-8')
             return {'mensagem': cor + apelido + "\033[22m escreveu\033[38;5;255m: " + mensagem, 'comando': comando}
 
-        # elif comando == 'entrando':  # Avisa (ao servidor) que
-        #     addr = bMensagem[26:tam].decode('utf-8')
-        #     return "\033[38;5;248m" + addr + " entrando...\033[38;5;255m\n"
-        # elif comando == 'apelido?':
-        #     return "Qual o seu apelido?\n"
-        # elif comando == '  entrou':
-        #     return "\033[38;5;248m" + apelido + " entrou!\033[38;5;255m\n"
-        # elif comando == '     pop':
-        #     return "\n"*100
-        # elif comando == '    sair':
-        #     return "\033[38;5;248m" + apelido + " saiu!\033[38;5;255m\n"
-        # elif comando == '   lista':
-        #     lista = bMensagem[26:tam].decode('utf-8')
-        #     lista = lista[:-1].split('\n')
-        #     listaColorida = ''
-        #     for usuario in lista:
-        #         usuarioSplit = usuario.split('\t')
-        #         cor = self.getCor(usuarioSplit[0])
-        #         apelidoColorido = cor + usuarioSplit[0] + '\033[38;5;255m'
-        #         listaColorida += apelidoColorido + '\t' + \
-        #             usuarioSplit[1] + '\t' + usuarioSplit[2] + '\n'
-        #     return ("APELIDO\tIP\tPORTA\n" + listaColorida + '\033[22;38;5;255m').expandtabs(16)
-        # elif comando == ' privado':
-        #     dados = bMensagem[26:tam].decode('utf-8')
-        #     return cor + apelido + "\033[22m mandou no privado\033[38;5;255m: " + dados + "\n"
-        # elif comando == 'eprivado':
-        #     return "\033[38;5;248mNão há usuário com esse apelido logado na sala\033[38;5;255m\n"
-        # elif comando == 'jaExiste':
-        #     return "\033[38;5;248mJá existe um usuário logado com este apelido\033[38;5;255m\n"
-        else:
-            # Debugar
-            return "tam: "+str(tam)+";apelido: "+apelido+";comando: "+comando + '\n' + ';mensagem :'+bMensagem.decode('utf-8')
+        else:  # Debugar
+            return {'mensagem': "tam: "+str(tam)+";apelido: "+apelido+";comando: "+comando + '\n' + ';mensagem :'+bMensagem.decode('utf-8'), 'comando': 'debug'}

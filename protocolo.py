@@ -82,7 +82,7 @@ def codifica(apelido, mensagem):
     if pos != -1:
         fim = mensagem.find(')')
         destinatario = mensagem[pos+7:fim+1]
-        mensagem = mensagem[0:pos] + mensagem[fim+1:]
+        mensagem = mensagem[:pos] + mensagem[fim+1:]
         return MontaMensagem('privado?', destinatario + mensagem)
 
     # Comando de sucesso de envio de mensagem privada
@@ -94,8 +94,7 @@ def codifica(apelido, mensagem):
     # Comando de falha de envio de mensagem privada
     pos = mensagem.find("privadoFAIL")
     if pos != -1:
-        mensagem = mensagem[9:]
         return MontaMensagem('privado0')
 
-    # Mensagem para a sala texto sem conter nenhum comando
+    # Mensagem para a sala (nenhum comando)
     return MontaMensagem('   todos', mensagem)
