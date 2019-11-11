@@ -26,8 +26,12 @@ class Servidor(Thread):
     def run(self):
         while self.vivo:
             bMensagem = self.cSocket.recv(1024)
-            # comando que o servidor envia para forçar a desconexão
-            self.listaDeMensagens.append(bMensagem)
+            if bMensagem == b'':
+                self.mataThread()
+                print('\033[0m\nO servidor caiu! Pressione qualquer tecla para sair')
+            else:
+                self.listaDeMensagens.append(bMensagem)
+                # comando que o servidor envia para forçar a desconexão
             if display.trataMensagem(bMensagem).get('comando') == 'encerrar':
                 sleep(0.1)
                 self.mataThread()

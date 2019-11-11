@@ -190,7 +190,7 @@ class Display(Thread):
             return {'mensagem': "\033[38;5;248m" + apelido + " saiu!\033[38;5;255m", 'comando': comando}
 
         elif apelido == 'Servidor' and comando == 'encerrar':
-            return {'mensagem': '\033[38;5;248mO servidor está fora do ar. Pressione qualquer tecla para sair \033[38;5;255m', 'comando': comando}
+            return {'mensagem': '\033[38;5;248mO servidor foi desligado. Pressione qualquer tecla para sair \033[38;5;255m', 'comando': comando}
 
         elif comando == '   todos':  # Mandar menságem pública (para o grupo)
             mensagem = bMensagem[26:tam].decode('utf-8')
