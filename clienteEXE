@@ -1,2 +1,0 @@
-source chat/bin/activate
-python3 chatCliente.py
